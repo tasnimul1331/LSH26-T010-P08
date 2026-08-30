@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
 interface FloatingEquation {
@@ -22,7 +22,7 @@ const equations: FloatingEquation[] = [
     x: 4,
     y: 14,
     theme: 'gold',
-    delay: 0,
+    delay: 0.2,
     duration: 5.2,
   },
   {
@@ -32,7 +32,7 @@ const equations: FloatingEquation[] = [
     x: 74,
     y: 14,
     theme: 'sapphire',
-    delay: 0.8,
+    delay: 0.6,
     duration: 5.8,
   },
   {
@@ -42,7 +42,7 @@ const equations: FloatingEquation[] = [
     x: 4,
     y: 78,
     theme: 'emerald',
-    delay: 1.4,
+    delay: 1.0,
     duration: 4.8,
   },
   {
@@ -52,7 +52,7 @@ const equations: FloatingEquation[] = [
     x: 74,
     y: 76,
     theme: 'gold',
-    delay: 0.5,
+    delay: 0.4,
     duration: 5.5,
   },
   {
@@ -62,7 +62,7 @@ const equations: FloatingEquation[] = [
     x: 5,
     y: 46,
     theme: 'amber',
-    delay: 1.8,
+    delay: 1.2,
     duration: 4.6,
   },
   {
@@ -72,27 +72,29 @@ const equations: FloatingEquation[] = [
     x: 75,
     y: 46,
     theme: 'sapphire',
-    delay: 1.2,
+    delay: 0.8,
     duration: 5.0,
   },
 ];
 
 const mathSymbols = [
   { symbol: '∑', x: 4, y: 32, size: 'text-3xl sm:text-4xl', color: 'text-amber-600/35', delay: 0 },
-  { symbol: '∫', x: 94, y: 28, size: 'text-4xl sm:text-5xl', color: 'text-blue-600/30', delay: 0.8 },
-  { symbol: 'π', x: 14, y: 86, size: 'text-3xl sm:text-4xl', color: 'text-amber-600/35', delay: 1.6 },
-  { symbol: 'λ', x: 91, y: 82, size: 'text-2xl sm:text-3xl', color: 'text-emerald-600/35', delay: 1.2 },
-  { symbol: 'Δ', x: 88, y: 52, size: 'text-3xl sm:text-4xl', color: 'text-amber-600/35', delay: 0.4 },
-  { symbol: '√', x: 10, y: 60, size: 'text-3xl sm:text-4xl', color: 'text-blue-500/35', delay: 2.0 },
-  { symbol: 'μ', x: 50, y: 10, size: 'text-2xl sm:text-3xl', color: 'text-amber-600/35', delay: 1.4 },
-  { symbol: 'Ω', x: 30, y: 20, size: 'text-2xl sm:text-3xl', color: 'text-emerald-500/35', delay: 2.4 },
-  { symbol: '∞', x: 48, y: 90, size: 'text-3xl sm:text-4xl', color: 'text-amber-600/35', delay: 0.6 },
+  { symbol: '∫', x: 94, y: 28, size: 'text-4xl sm:text-5xl', color: 'text-blue-600/30', delay: 0.5 },
+  { symbol: 'π', x: 14, y: 86, size: 'text-3xl sm:text-4xl', color: 'text-amber-600/35', delay: 1.0 },
+  { symbol: 'λ', x: 91, y: 82, size: 'text-2xl sm:text-3xl', color: 'text-emerald-600/35', delay: 0.8 },
+  { symbol: 'Δ', x: 88, y: 52, size: 'text-3xl sm:text-4xl', color: 'text-amber-600/35', delay: 0.3 },
+  { symbol: '√', x: 10, y: 60, size: 'text-3xl sm:text-4xl', color: 'text-blue-500/35', delay: 1.2 },
+  { symbol: 'μ', x: 50, y: 10, size: 'text-2xl sm:text-3xl', color: 'text-amber-600/35', delay: 0.9 },
+  { symbol: 'Ω', x: 30, y: 20, size: 'text-2xl sm:text-3xl', color: 'text-emerald-500/35', delay: 1.4 },
+  { symbol: '∞', x: 48, y: 90, size: 'text-3xl sm:text-4xl', color: 'text-amber-600/35', delay: 0.4 },
 ];
 
 export default function HeroScene() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    setIsReady(true);
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -114,8 +116,8 @@ export default function HeroScene() {
     const particles = Array.from({ length: particleCount }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.6,
-      vy: (Math.random() - 0.5) * 0.6,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
       radius: Math.random() * 2.2 + 1.2,
       color: Math.random() > 0.5 ? 'rgba(197, 155, 39, ' : 'rgba(30, 58, 138, ',
       alpha: Math.random() * 0.35 + 0.25,
@@ -173,7 +175,12 @@ export default function HeroScene() {
   }, []);
 
   return (
-    <div className="relative w-full h-full min-h-[600px] overflow-hidden pointer-events-none select-none">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: isReady ? 1 : 0 }}
+      transition={{ duration: 0.8, ease: 'easeOut' }}
+      className="relative w-full h-full min-h-[600px] overflow-hidden pointer-events-none select-none"
+    >
       {/* Background Interactive Constellation Canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full z-0 opacity-85" />
 
@@ -183,16 +190,17 @@ export default function HeroScene() {
           key={idx}
           className={`absolute font-serif font-bold ${item.size} ${item.color} z-0 select-none pointer-events-none`}
           style={{ left: `${item.x}%`, top: `${item.y}%` }}
+          initial={{ opacity: 0, scale: 0.9 }}
           animate={{
             y: [0, -22, 0],
             rotate: [0, 10, -10, 0],
             opacity: [0.25, 0.55, 0.25],
+            scale: 1,
           }}
           transition={{
-            duration: 5.5 + idx * 0.4,
-            repeat: Infinity,
-            ease: 'easeInOut',
-            delay: item.delay,
+            opacity: { duration: 0.6, delay: item.delay },
+            y: { duration: 5.5 + idx * 0.4, repeat: Infinity, ease: 'easeInOut', delay: item.delay },
+            rotate: { duration: 5.5 + idx * 0.4, repeat: Infinity, ease: 'easeInOut', delay: item.delay },
           }}
         >
           {item.symbol}
@@ -227,16 +235,16 @@ export default function HeroScene() {
               left: `${eq.x}%`,
               top: `${eq.y}%`,
             }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{
               y: [0, -18, 0],
               x: [0, 8, 0],
               opacity: [0.75, 1, 0.75],
             }}
             transition={{
-              duration: eq.duration,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: eq.delay,
+              opacity: { duration: 0.6, delay: eq.delay },
+              y: { duration: eq.duration, repeat: Infinity, ease: 'easeInOut', delay: eq.delay },
+              x: { duration: eq.duration, repeat: Infinity, ease: 'easeInOut', delay: eq.delay },
             }}
           >
             <div className="flex items-center gap-1.5">
@@ -253,6 +261,6 @@ export default function HeroScene() {
           </motion.div>
         );
       })}
-    </div>
+    </motion.div>
   );
 }

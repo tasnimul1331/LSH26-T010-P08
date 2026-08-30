@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -47,7 +47,7 @@ export async function middleware(request: NextRequest) {
     }
   } catch (err) {
     // Fail gracefully without crashing
-    console.error('Middleware Supabase session evaluation notice:', err);
+    console.error('Proxy Supabase session evaluation notice:', err);
   }
 
   return supabaseResponse;

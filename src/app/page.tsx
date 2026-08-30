@@ -3,16 +3,16 @@
 import { useState, useMemo, Suspense, lazy } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { 
   Search, Shield, BarChart3, FileCheck, ChevronRight, 
   GraduationCap, CheckCircle2, XCircle, ArrowRight, Sparkles,
   ClipboardCheck, Eye, Lock, QrCode, Download, Printer,
-  ChevronDown, Layers, Award
+  ChevronDown, Layers, Award, AlertCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,
@@ -21,25 +21,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
 import { getCases, getStudentWithDetails } from '@/lib/data-service';
 
 const HeroScene = lazy(() => import('@/components/three/HeroScene'));
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -47,14 +33,14 @@ const containerVariants = {
   }
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] } }
 };
 
 export default function LandingPage() {
   const [selectedCase, setSelectedCase] = useState<string>('PUB-01');
-  const [searchQuery, setSearchQuery] = useState<string>('S001');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeResult, setActiveResult] = useState<any>(null);
   const [searchError, setSearchError] = useState<string | null>(null);
   const router = useRouter();
@@ -66,7 +52,8 @@ export default function LandingPage() {
     const rawStudent = (studentCodeOverride !== undefined ? studentCodeOverride : searchQuery).trim();
     
     if (!rawStudent) {
-      setSearchError('Please enter a student ID (e.g. S001).');
+      setSearchError('Please enter a Student ID (e.g. S001).');
+      setActiveResult(null);
       return;
     }
 
@@ -79,14 +66,15 @@ export default function LandingPage() {
       formattedStudentCode = `S${numMatch[1].padStart(3, '0')}`;
     }
 
-    // Direct lookup in deterministic store
+    // Find real student result from existing deterministic data source
     const details = getStudentWithDetails(cCode, formattedStudentCode);
     if (details && details.calculated) {
       setActiveResult(details);
       setSearchQuery(formattedStudentCode);
+      setSearchError(null);
     } else {
       setActiveResult(null);
-      setSearchError(`No published student found for ID "${formattedStudentCode}" in cohort ${cCode}. Try searching another ID or cohort.`);
+      setSearchError(`Student ID ${formattedStudentCode} was not found in ${cCode}.`);
     }
   };
 
@@ -121,7 +109,7 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden pt-20 pb-16">
-        {/* 3D Crystalline Background */}
+        {/* 3D Scientific Background */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <Suspense fallback={<HeroFallback />}>
             <HeroScene />
@@ -130,11 +118,12 @@ export default function LandingPage() {
 
         {/* Hero Content */}
         <motion.div 
-          className="relative z-10 max-w-4xl mx-auto px-4 text-center"
+          className="relative z-10 max-w-4xl mx-auto px-4 text-center py-10"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
+          {/* Eyebrow Reveal */}
           <motion.div variants={itemVariants}>
             <Badge variant="outline" className="mb-5 px-4 py-1.5 text-xs font-semibold border-amber-600/30 bg-amber-50 text-amber-900 shadow-xs">
               <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-700 inline" />
@@ -142,6 +131,7 @@ export default function LandingPage() {
             </Badge>
           </motion.div>
 
+          {/* Headline Reveal */}
           <motion.h1 
             variants={itemVariants}
             className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-5 text-foreground"
@@ -151,6 +141,7 @@ export default function LandingPage() {
             <span className="gradient-text">a Reason.</span>
           </motion.h1>
 
+          {/* Supporting Copy Reveal */}
           <motion.p 
             variants={itemVariants}
             className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8 font-normal leading-relaxed"
@@ -159,17 +150,17 @@ export default function LandingPage() {
             verifiable, and audit-ready academic transcripts. Every grade point traced. Every decision explained.
           </motion.p>
 
-          {/* Luxury Search Box with PUB Dropdown (Down Arrow) */}
-          <motion.div variants={itemVariants} className="max-w-2xl mx-auto mb-4">
+          {/* Search Panel Reveal */}
+          <motion.div variants={itemVariants} className="max-w-2xl mx-auto mb-3">
             <div className="flex flex-col sm:flex-row items-center gap-2 bg-white/95 p-2 rounded-2xl border border-border/90 luxury-card backdrop-blur-md">
-              {/* Case Dropdown with Down Arrow */}
+              {/* Publication Selector Dropdown with Down Arrow */}
               <div className="w-full sm:w-auto">
                 <Select
                   value={selectedCase}
                   onValueChange={(val) => {
                     if (val) {
                       setSelectedCase(val);
-                      if (activeResult) {
+                      if (searchQuery.trim()) {
                         handleCheckResult(val, searchQuery);
                       }
                     }
@@ -188,7 +179,7 @@ export default function LandingPage() {
                 </Select>
               </div>
 
-              {/* Student ID Input */}
+              {/* Student ID Search Input */}
               <div className="relative flex-1 w-full">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -196,7 +187,7 @@ export default function LandingPage() {
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
-                    setSearchError(null);
+                    if (searchError) setSearchError(null);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -220,19 +211,146 @@ export default function LandingPage() {
             </div>
           </motion.div>
 
-          {/* Search Error Message */}
+          {/* Invalid Search Inline Error */}
           {searchError && (
             <motion.div
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-xs text-rose-600 bg-rose-50 border border-rose-200 px-4 py-2 rounded-xl max-w-md mx-auto mb-4"
+              className="text-xs text-rose-700 bg-rose-50 border border-rose-200 px-4 py-2 rounded-xl max-w-md mx-auto my-3 flex items-center justify-center gap-2"
             >
-              {searchError}
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{searchError}</span>
             </motion.div>
           )}
 
+          {/* Result Preview Card (Appears BELOW the Search Panel) */}
+          <AnimatePresence mode="wait">
+            {activeResult && activeResult.calculated && (
+              <motion.div
+                key={`${activeResult.student.case_code}_${activeResult.student.student_code}`}
+                initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 15, scale: 0.98 }}
+                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                className="text-left w-full max-w-2xl mx-auto my-6"
+              >
+                <Card className="luxury-card overflow-hidden border-amber-500/40 shadow-xl bg-white">
+                  {/* Result Found Indicator Header */}
+                  <div className="bg-gradient-to-r from-amber-50/80 via-white to-slate-50 border-b border-border/80 px-5 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50/90 border border-emerald-300/80 px-2.5 py-0.5 rounded-full shadow-2xs">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        Result Found
+                      </div>
+                      <Badge variant="outline" className="font-mono text-[11px] border-border/80">
+                        {activeResult.student.case_code} • {activeResult.student.class_name}
+                      </Badge>
+                    </div>
+
+                    <div className="text-right flex items-center gap-2">
+                      <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-secondary text-foreground border border-border/70">
+                        {activeResult.student.student_code}
+                      </span>
+                    </div>
+                  </div>
+
+                  <CardContent className="p-5 sm:p-6 space-y-4">
+                    {/* Student Identity & Main GPA Header */}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-border/60">
+                      <div>
+                        <h3 className="text-lg sm:text-xl font-bold text-foreground">
+                          {activeResult.student.name}
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          Optional (4th) Subject: <strong className="text-foreground">{activeResult.student.optional_subject_name}</strong> ({activeResult.student.optional_subject_code})
+                        </p>
+                      </div>
+
+                      <div className="text-right flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2">
+                        <div className="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-foreground">
+                          GPA {activeResult.calculated.gpa.toFixed(2)}
+                        </div>
+                        <Badge
+                          className={`text-xs px-2.5 py-0.5 font-semibold border ${
+                            activeResult.calculated.passed
+                              ? 'border-emerald-500/40 text-emerald-800 bg-emerald-50'
+                              : 'border-rose-500/40 text-rose-800 bg-rose-50'
+                          }`}
+                        >
+                          Grade {activeResult.calculated.letterGrade} ({activeResult.calculated.passed ? 'PASSED' : 'FAILED'})
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* Failure Alert if Failed */}
+                    {!activeResult.calculated.passed && (
+                      <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
+                        <XCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                        <div>
+                          <strong className="font-semibold block mb-0.5">Failure Reason:</strong>
+                          {activeResult.calculated.trace.failureReasons.join(' ')}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Subject Grade Points Summary */}
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block">
+                        Subject Grade Points (GP)
+                      </span>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {activeResult.calculated.subjectResults.map((sr: any) => (
+                          <div
+                            key={sr.subjectCode}
+                            className={`p-2 rounded-lg border text-xs font-mono flex items-center justify-between ${
+                              sr.isOptional
+                                ? 'bg-amber-50/60 border-amber-300/80 text-amber-950'
+                                : 'bg-secondary/40 border-border/70 text-foreground'
+                            }`}
+                          >
+                            <span className="font-semibold font-sans">{sr.subjectCode}</span>
+                            <span className="font-bold">
+                              {sr.isAbsent ? 'AB' : sr.gradePoint.toFixed(2)}{' '}
+                              <span className="text-[10px] font-normal text-muted-foreground font-sans">({sr.letterGrade})</span>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Why this result? Summary */}
+                    <div className="p-3 rounded-xl bg-secondary/30 border border-border/70 text-xs space-y-1">
+                      <div className="flex items-center gap-1.5 font-semibold text-foreground text-[11px]">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+                        Why this result? (Calculation Summary)
+                      </div>
+                      <div className="font-mono text-[11px] text-muted-foreground space-y-0.5">
+                        <div>• Compulsory GP Sum: <strong className="text-foreground">{activeResult.calculated.compulsoryGradePointSum.toFixed(2)}</strong></div>
+                        <div>• 4th Subject Excess: max(0, {activeResult.calculated.optionalGradePoint.toFixed(2)} - 2.00) = <strong className="text-amber-800">+{activeResult.calculated.optionalContribution.toFixed(2)}</strong></div>
+                        <div>• Formula: min(5.00, ({activeResult.calculated.compulsoryGradePointSum.toFixed(2)} + {activeResult.calculated.optionalContribution.toFixed(2)}) / 6) = <strong className="text-foreground">{activeResult.calculated.gpa.toFixed(2)}</strong></div>
+                      </div>
+                    </div>
+
+                    {/* View Detailed Result Action */}
+                    <div className="pt-2 flex items-center justify-between border-t border-border/60">
+                      <div className="text-[11px] text-muted-foreground font-mono">
+                        Token: {activeResult.result?.verification_token || 'VRF-STAMP-VERIFIED'}
+                      </div>
+
+                      <Link href={`/results/${activeResult.student.case_code}/${activeResult.student.student_code}`}>
+                        <Button className="gradient-bg-primary text-white text-xs h-9 px-4 gap-1.5 shadow-sm hover:opacity-90 font-semibold cursor-pointer">
+                          View Detailed Result →
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Quick Test Case Chips */}
-          <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground mb-8">
+          <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground mt-4 mb-2">
             <span className="font-medium text-foreground/80">Quick Test Cases:</span>
             <button
               type="button"
@@ -279,163 +397,6 @@ export default function LandingPage() {
               PUB-01 / S076 (A+ 5.00)
             </button>
           </motion.div>
-
-          {/* Direct Result Showcase Card */}
-          <AnimatePresence>
-            {activeResult && activeResult.calculated && (
-              <motion.div
-                initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 15, scale: 0.98 }}
-                transition={{ duration: 0.35 }}
-                className="text-left max-w-3xl mx-auto mb-12"
-              >
-                <Card className="luxury-card overflow-hidden border-amber-500/40 shadow-xl bg-white">
-                  {/* Card Header Banner */}
-                  <div className="bg-gradient-to-r from-amber-50 via-amber-100/40 to-slate-50 border-b border-border/80 p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Badge className="font-mono text-xs gradient-bg-accent text-white border-0">
-                          {activeResult.student.case_code}
-                        </Badge>
-                        <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-white border border-border/80 text-foreground">
-                          {activeResult.student.student_code}
-                        </span>
-                        <Badge variant="outline" className="text-xs border-border/80">
-                          {activeResult.student.class_name}
-                        </Badge>
-                      </div>
-                      <h2 className="text-xl sm:text-2xl font-bold text-foreground">
-                        {activeResult.student.name}
-                      </h2>
-                      <p className="text-xs text-muted-foreground">
-                        Optional 4th Subject: <strong className="text-foreground">{activeResult.student.optional_subject_name}</strong> ({activeResult.student.optional_subject_code})
-                      </p>
-                    </div>
-
-                    <div className="text-right flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2">
-                      <div className="text-3xl font-extrabold font-mono tracking-tight text-foreground">
-                        GPA {activeResult.calculated.gpa.toFixed(2)}
-                      </div>
-                      <Badge
-                        className={`text-xs px-3 py-1 font-semibold border ${
-                          activeResult.calculated.passed
-                            ? 'border-emerald-500/40 text-emerald-800 bg-emerald-50'
-                            : 'border-rose-500/40 text-rose-800 bg-rose-50'
-                        }`}
-                      >
-                        Grade {activeResult.calculated.letterGrade} • {activeResult.calculated.passed ? 'PASSED' : 'FAILED'}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <CardContent className="p-5 sm:p-6 space-y-6">
-                    {/* Failure Alert if Failed */}
-                    {!activeResult.calculated.passed && (
-                      <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
-                        <XCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                        <div>
-                          <strong className="font-semibold block mb-0.5">Failure Reason:</strong>
-                          {activeResult.calculated.trace.failureReasons.join(' ')}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Subject Marks Table */}
-                    <div className="overflow-x-auto rounded-xl border border-border/80">
-                      <Table>
-                        <TableHeader>
-                          <TableRow className="bg-secondary/40 border-border/80">
-                            <TableHead className="text-xs font-semibold">Subject</TableHead>
-                            <TableHead className="text-xs font-semibold text-center">Type</TableHead>
-                            <TableHead className="text-xs font-semibold text-right">Theory</TableHead>
-                            <TableHead className="text-xs font-semibold text-right">Practical</TableHead>
-                            <TableHead className="text-xs font-semibold text-right">Total</TableHead>
-                            <TableHead className="text-xs font-semibold text-center">Grade</TableHead>
-                            <TableHead className="text-xs font-semibold text-right">GP</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {activeResult.calculated.subjectResults.map((sr: any) => (
-                            <TableRow key={sr.subjectCode} className="border-border/60 hover:bg-muted/20">
-                              <TableCell className="font-medium text-xs">
-                                {sr.subjectName} <span className="font-mono text-[10px] text-muted-foreground">({sr.subjectCode})</span>
-                              </TableCell>
-                              <TableCell className="text-center text-xs">
-                                <Badge variant="outline" className={`text-[10px] ${sr.isOptional ? 'border-amber-400 text-amber-800 bg-amber-50' : 'border-border/80'}`}>
-                                  {sr.isOptional ? '4th (Opt)' : 'Compulsory'}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-right font-mono text-xs">
-                                {sr.isAbsent ? 'AB' : sr.theoryMarks ?? '—'}
-                              </TableCell>
-                              <TableCell className="text-right font-mono text-xs">
-                                {sr.isAbsent ? 'AB' : sr.practicalMarks ?? '—'}
-                              </TableCell>
-                              <TableCell className="text-right font-mono text-xs font-semibold">
-                                {sr.isAbsent ? 'AB' : sr.totalMarks}
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <Badge
-                                  variant="outline"
-                                  className={`text-[10px] font-bold ${
-                                    sr.passed
-                                      ? 'border-emerald-500/30 text-emerald-700 bg-emerald-50'
-                                      : 'border-rose-500/30 text-rose-700 bg-rose-50'
-                                  }`}
-                                >
-                                  {sr.letterGrade}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-right font-mono text-xs font-bold">
-                                {sr.gradePoint.toFixed(2)}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-
-                    {/* Expandable Mathematical Calculation Trace */}
-                    <Accordion defaultValue={['trace-summary']} className="w-full">
-                      <AccordionItem value="trace-summary" className="border-border/70 rounded-xl px-3 bg-secondary/20">
-                        <AccordionTrigger className="text-xs font-semibold hover:no-underline py-2.5 text-foreground">
-                          <span className="flex items-center gap-2">
-                            <Sparkles className="w-3.5 h-3.5 text-amber-700" />
-                            Why this result? (Step-by-Step Deterministic Calculation Trace)
-                          </span>
-                        </AccordionTrigger>
-                        <AccordionContent className="text-xs space-y-2 pt-1 font-mono text-muted-foreground">
-                          <div className="p-3 rounded-lg bg-white border border-border/80 text-foreground space-y-1.5">
-                            <div>• <strong>Compulsory GP Sum:</strong> {activeResult.calculated.compulsoryGradePointSum.toFixed(2)} (from 6 compulsory subjects)</div>
-                            <div>• <strong>4th Subject ({activeResult.student.optional_subject_code}) GP:</strong> {activeResult.calculated.optionalGradePoint.toFixed(2)}</div>
-                            <div>• <strong>Optional Excess Contribution:</strong> max(0, {activeResult.calculated.optionalGradePoint.toFixed(2)} - 2.00) = <strong className="text-amber-800">+{activeResult.calculated.optionalContribution.toFixed(2)}</strong></div>
-                            <div>• <strong>Total Calculation Sum:</strong> {activeResult.calculated.compulsoryGradePointSum.toFixed(2)} + {activeResult.calculated.optionalContribution.toFixed(2)} = <strong>{activeResult.calculated.totalGradePointSum.toFixed(2)}</strong></div>
-                            <div>• <strong>Formula:</strong> min(5.00, {activeResult.calculated.totalGradePointSum.toFixed(2)} / 6) = <strong>{activeResult.calculated.gpa.toFixed(2)}</strong></div>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
-
-                    {/* Direct Action Link */}
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
-                        <QrCode className="w-4 h-4 text-amber-700" />
-                        <span>Token: {activeResult.result?.verification_token || 'VRF-STAMP-VERIFIED'}</span>
-                      </div>
-
-                      <Link href={`/results/${activeResult.student.case_code}/${activeResult.student.student_code}`}>
-                        <Button className="gradient-bg-primary text-white text-xs h-9 gap-1.5 shadow-sm hover:opacity-90">
-                          View Full Transcript & Download PDF
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </motion.div>
       </section>
 

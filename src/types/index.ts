@@ -176,6 +176,7 @@ export interface CheckingItem {
   result_id: string;
   type: CheckingItemType;
   severity: CheckingSeverity;
+  status: 'OPEN' | 'REVIEWED' | 'RESOLVED';
   subject_id: string | null;
   title: string;
   description: string;
@@ -183,6 +184,7 @@ export interface CheckingItem {
   resolved: boolean;
   resolved_by: string | null;
   resolved_at: string | null;
+  resolution_notes?: string | null;
   created_at: string;
 }
 

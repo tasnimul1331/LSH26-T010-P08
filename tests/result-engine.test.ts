@@ -11,6 +11,7 @@ import {
   normalizeRawMark,
   detectFailures,
   generateCheckingItems,
+  validateMark,
   DEFAULT_GRADING_RULES,
 } from '@/lib/result-engine';
 import type { MarkInput, ResolvedGradingRules, SubjectResultOutput } from '@/lib/result-engine';
@@ -611,5 +612,46 @@ describe('Integration: PUB-01 S001', () => {
     expect(result.letterGrade).toBe('A');
     expect(result.subjectResults).toHaveLength(7);
     expect(result.checkingItems).toHaveLength(0);
+  });
+});
+
+// ============================================================
+// Mark Validation Unit Tests
+// ============================================================
+
+describe('validateMark and validateStudentMarks', () => {
+  it('detects negative marks', () => {
+    const mark = makeSimpleMark('BAN', 'Bangla', -5);
+    const result = validateMark(mark, rules);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e: string) => e.includes('negative'))).toBe(true);
+  });
+
+  it('detects marks exceeding non-practical maximum (>100)', () => {
+    const mark = makeSimpleMark('BAN', 'Bangla', 105);
+    const result = validateMark(mark, rules);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e: string) => e.includes('exceed maximum'))).toBe(true);
+  });
+
+  it('detects theory marks exceeding maximum (>75)', () => {
+    const mark = makePracticalMark('PHY', 'Physics', 80, 15);
+    const result = validateMark(mark, rules);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e: string) => e.includes('Theory marks (80) exceed maximum (75)'))).toBe(true);
+  });
+
+  it('detects practical marks exceeding maximum (>25)', () => {
+    const mark = makePracticalMark('PHY', 'Physics', 50, 30);
+    const result = validateMark(mark, rules);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e: string) => e.includes('Practical marks (30) exceed maximum (25)'))).toBe(true);
+  });
+
+  it('accepts valid practical boundary marks (75 theory, 25 practical)', () => {
+    const mark = makePracticalMark('PHY', 'Physics', 75, 25);
+    const result = validateMark(mark, rules);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
   });
 });

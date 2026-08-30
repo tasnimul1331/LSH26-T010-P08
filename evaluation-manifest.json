@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "project": {
+    "id": "P08",
+    "name": "BottleResult",
+    "title": "BottleResult — Explainable & Verifiable School Result Intelligence Platform",
+    "description": "Every Result Has a Reason. Deterministic school marks processing, GPA engine, explainable calculation traces, scrutiny checking center, audit trails, and cryptographic QR public verification."
+  },
+  "team": {
+    "id": "LSH26-T010",
+    "name": "LSH26-T010"
+  },
+  "repository": {
+    "name": "LSH26-T010-P08",
+    "visibility": "public",
+    "url": "https://github.com/tasnimul1331/LSH26-T010-P08"
+  },
+  "deployment": {
+    "platform": "Vercel",
+    "url": "https://bottleresult.vercel.app"
+  },
+  "technology": {
+    "framework": "Next.js 15 (App Router)",
+    "language": "TypeScript",
+    "database": "Supabase PostgreSQL",
+    "styling": "Tailwind CSS + shadcn/ui",
+    "animation": "Framer Motion",
+    "visuals_3d": "React Three Fiber + Three.js",
+    "analytics": "Recharts",
+    "testing": "Vitest"
+  },
+  "features": [
+    "100% Deterministic result calculation engine (Pure, Isolated, Tested)",
+    "Configurable Bangladesh SSC grading rules & component pass thresholds",
+    "Per-subject explainable calculation trace ('Why this result?')",
+    "Automated Checking Center for scrutiny of compulsory failures, practical issues, absences, and low GP",
+    "Interactive Marks Management with live recalculation and old vs new GPA comparison",
+    "Immutable audit trail logging all state mutations and corrections",
+    "Public result search and transcript portal",
+    "QR code digital authenticity verification with secure tokens",
+    "Official printable transcript layout & instant PDF generation",
+    "Live data-driven analytics charts and statistical insights across 25 cohorts",
+    "Interactive Judge Demo mode with curated guided walkthroughs",
+    "Command Palette (Cmd/Ctrl + K) for rapid navigation"
+  ]
+}

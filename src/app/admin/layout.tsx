@@ -6,14 +6,12 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Users, BookOpen, Award, ClipboardCheck,
-  BarChart3, Upload, Settings, FileText, Shield, GraduationCap,
-  ChevronLeft, Menu, Search, LogOut, Bell, Scale
+  BarChart3, Upload, Settings, FileText, GraduationCap,
+  ChevronLeft, Menu, Search, LogOut, Scale, Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { CommandPalette } from '@/components/ui/CommandPalette';
 
@@ -102,7 +100,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </ScrollArea>
 
         {/* Sidebar Footer */}
-        <div className="p-3 border-t border-sidebar-border">
+        <div className="p-3 border-t border-sidebar-border space-y-2">
+          <Link href="/demo">
+            <Button variant="outline" size="sm" className="w-full justify-start border-emerald-500/30 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 gap-2">
+              <Sparkles className="w-4 h-4" />
+              {!collapsed && <span className="text-sm font-medium">Judge Demo</span>}
+            </Button>
+          </Link>
           <Link href="/">
             <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground/60 hover:text-sidebar-foreground gap-2">
               <LogOut className="w-4 h-4" />
@@ -118,10 +122,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <header className="h-16 border-b border-border flex items-center px-4 lg:px-6 gap-4 bg-card/50 backdrop-blur-sm sticky top-0 z-40">
           {/* Mobile menu */}
           <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden">
+            <SheetTrigger>
+              <span className="lg:hidden p-2 rounded-md hover:bg-muted inline-flex items-center justify-center cursor-pointer">
                 <Menu className="w-5 h-5" />
-              </Button>
+              </span>
             </SheetTrigger>
             <SheetContent side="left" className="w-64 bg-sidebar p-0">
               <div className="h-16 flex items-center px-4 border-b border-sidebar-border">
@@ -149,6 +153,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   })}
                 </nav>
               </ScrollArea>
+              <div className="p-3 border-t border-sidebar-border">
+                <Link href="/demo">
+                  <Button variant="outline" size="sm" className="w-full justify-start text-emerald-400 gap-2 mb-2">
+                    <Sparkles className="w-4 h-4" />
+                    <span>Judge Demo</span>
+                  </Button>
+                </Link>
+              </div>
             </SheetContent>
           </Sheet>
 
@@ -163,6 +175,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
 
           <div className="ml-auto flex items-center gap-2">
+            <Link href="/demo">
+              <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 bg-emerald-500/10 cursor-pointer hover:bg-emerald-500/20">
+                <Sparkles className="w-3 h-3 mr-1" />
+                Demo Mode
+              </Badge>
+            </Link>
             <Badge variant="outline" className="text-xs">Admin</Badge>
           </div>
         </header>

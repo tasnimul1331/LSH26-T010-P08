@@ -348,55 +348,6 @@ export default function LandingPage() {
               </motion.div>
             )}
           </AnimatePresence>
-
-          {/* Quick Test Case Chips */}
-          <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground mt-4 mb-2">
-            <span className="font-medium text-foreground/80">Quick Test Cases:</span>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedCase('PUB-01');
-                setSearchQuery('S001');
-                handleCheckResult('PUB-01', 'S001');
-              }}
-              className="px-2.5 py-1 rounded-full bg-secondary/80 hover:bg-amber-100 hover:text-amber-900 border border-border/60 transition-colors font-mono cursor-pointer"
-            >
-              PUB-01 / S001 (Kamal Begum - 4.58)
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedCase('PUB-01');
-                setSearchQuery('S002');
-                handleCheckResult('PUB-01', 'S002');
-              }}
-              className="px-2.5 py-1 rounded-full bg-secondary/80 hover:bg-rose-100 hover:text-rose-900 border border-border/60 transition-colors font-mono cursor-pointer"
-            >
-              PUB-01 / S002 (Compulsory Fail)
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedCase('PUB-01');
-                setSearchQuery('S032');
-                handleCheckResult('PUB-01', 'S032');
-              }}
-              className="px-2.5 py-1 rounded-full bg-secondary/80 hover:bg-amber-100 hover:text-amber-900 border border-border/60 transition-colors font-mono cursor-pointer"
-            >
-              PUB-01 / S032 (Absent - AB)
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedCase('PUB-01');
-                setSearchQuery('S076');
-                handleCheckResult('PUB-01', 'S076');
-              }}
-              className="px-2.5 py-1 rounded-full bg-secondary/80 hover:bg-emerald-100 hover:text-emerald-900 border border-border/60 transition-colors font-mono cursor-pointer"
-            >
-              PUB-01 / S076 (A+ 5.00)
-            </button>
-          </motion.div>
         </motion.div>
       </section>
 

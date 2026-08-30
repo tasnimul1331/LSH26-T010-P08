@@ -398,11 +398,14 @@ export function getStudents(caseCode?: string) {
 
 export function getStudentWithDetails(caseCode: string, studentCode: string) {
   initializeStore();
-  const c = store.cases.find((x) => x.case_code === caseCode);
+  const normalizedCase = (caseCode || '').toUpperCase();
+  const normalizedStudent = (studentCode || '').toUpperCase();
+
+  const c = store.cases.find((x) => x.case_code.toUpperCase() === normalizedCase);
   if (!c) return null;
 
   const student = store.students.find(
-    (s) => s.case_id === c.id && s.student_code === studentCode
+    (s) => s.case_id === c.id && s.student_code.toUpperCase() === normalizedStudent
   );
   if (!student) return null;
 
@@ -412,7 +415,7 @@ export function getStudentWithDetails(caseCode: string, studentCode: string) {
   const subjectRes = store.subjectResults.filter((sr) => sr.result_id === result?.id);
   const marks = store.marks.filter((m) => m.student_id === student.id);
   const issues = store.checkingItems.filter((i) => i.student_id === student.id);
-  const studentKey = `${caseCode}_${studentCode}`;
+  const studentKey = `${c.case_code}_${student.student_code}`;
   const calculated = store.calculatedStudentsMap.get(studentKey);
 
   const enrichedSubjects = subjectRes.map((sr) => {
